@@ -1,2 +1,19 @@
 ---
 # defaults file for openssl-pki
+
+openssl_pki_os_packages:
+  - openssl
+
+openssl_pki_intermediate_ca_name: "intermediate"
+openssl_pki_certs_dir: "{{ ansible_env.HOME}}"
+
+openssl_pki_country: "US"
+openssl_pki_locality: "Phoenix"
+openssl_pki_organization: "Example\\ LLC"
+openssl_pki_state: "Arizona"
+openssl_pki_ca_common_name: "Example\\ LLC\\ Certificate\\ Authority"
+openssl_pki_intermediate_common_name: "Example\\ LLC\\ Intermediate\\ Certificate\\ Authority"
+openssl_pki_days: "365"
+
+openssl_pki_ca_fields: "/C={{ openssl_pki_country }}/ST={{ openssl_pki_state }}/L={{ openssl_pki_locality }}/O={{ openssl_pki_organization }}/CN={{ openssl_pki_ca_common_name }}"
+openssl_pki_intermediate_fields: "/C={{ openssl_pki_country }}/ST={{ openssl_pki_state }}/L={{ openssl_pki_locality }}/O={{ openssl_pki_organization }}/CN={{ openssl_pki_intermediate_common_name }}"

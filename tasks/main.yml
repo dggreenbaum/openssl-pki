@@ -1,2 +1,78 @@
 ---
-# tasks file for openssl-pki
+- name: OS packages
+  package: "name={{ item }} state=present"
+  with_items: "{{ openssl_pki_os_packages }}"
+
+- name: Directories
+  file: "dest={{ item }} state=directory"
+  with_items:
+    - "{{ openssl_pki_certs_dir }}"
+    - "{{ openssl_pki_certs_dir }}/ca"
+    - "{{ openssl_pki_certs_dir }}/ca/certs"
+    - "{{ openssl_pki_certs_dir }}/ca/crl"
+    - "{{ openssl_pki_certs_dir }}/ca/newcerts"
+    - "{{ openssl_pki_certs_dir }}/ca/private"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/crl"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/newcerts"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private"
+
+- name: Index files
+  file: "dest={{ item }} state=touch"
+  with_items:
+    - "{{ openssl_pki_certs_dir }}/ca/index.txt"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/index.txt"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/ca-chain.cert.pem"
+
+- name: Serial files
+  copy: src=serial dest="{{ item }}" force=no
+  with_items:
+    - "{{ openssl_pki_certs_dir }}/ca/serial"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/serial"
+    - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/crlnumber"
+
+- name: OpenSSL root config
+  template:
+    src: root_openssl.cnf.j2
+    dest: "{{ openssl_pki_certs_dir }}/ca/openssl.cnf"
+
+- name: OpenSSL intermediate config
+  template:
+    src: intermediate_openssl.cnf.j2
+    dest: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf"
+
+- name: Generate root key
+  command: "openssl genrsa -out {{ openssl_pki_certs_dir }}/ca/private/ca.key.pem 4096"
+  args:
+    creates: "{{ openssl_pki_certs_dir }}/ca/private/ca.key.pem"
+
+- name: Generate root certificate
+  command: "openssl req -config {{ openssl_pki_certs_dir }}/ca/openssl.cnf -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_certs_dir }}/ca/private/ca.key.pem -new -x509 -days 7300 -sha256 -extensions v3_ca -out {{ openssl_pki_certs_dir }}/ca/certs/ca.cert.pem"
+  args:
+    creates: "{{ openssl_pki_certs_dir }}/ca/certs/ca.cert.pem"
+
+- name: Generate intermediate key
+  command: "openssl genrsa -out {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem 4096"
+  args:
+    creates: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem"
+
+- name: Generate intermediate csr
+  command: "openssl req -config {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf -new -sha256 -subj {{ openssl_pki_intermediate_fields }} -key {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem -out {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
+  args:
+    creates: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
+
+- name: Generate intermediate certificate
+  command: "openssl ca -batch -config {{ openssl_pki_certs_dir }}/ca/openssl.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha256 -in {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem -out {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
+  args:
+    creates: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
+
+- name: Generate intermediate chain
+  template:
+    src: ca-chain.cert.pem.j2
+    dest: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/ca-chain.cert.pem"
+
+- name: Validate root and intermediate certs
+  command: "openssl verify -CAfile {{ openssl_pki_certs_dir }}/ca/certs/ca.cert.pem {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
+  changed_when: false

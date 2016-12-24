@@ -6,7 +6,7 @@ This role sets up a root certificate authority (CA), an arbitrary number of inte
 Requirements
 ------------
 
-Requires a Unix like operating system. (Linux/OSX) The latest Debian/Ubuntu, RHEL/CentOS are supported.
+Requires a Unix like operating system. (Linux/OSX) The latest Debian/Ubuntu are supported.
 
 This role will attempt to install the openssl package or equivilant for your operating system. If your operating system does not have an openssl package (EG Windows)m this role won't work.
 
