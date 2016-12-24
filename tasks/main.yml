@@ -4,6 +4,7 @@
   with_items: "{{ openssl_pki_os_packages }}"
 
 - name: Directories
+  delegate_to: localhost
   file: "dest={{ item }} state=directory"
   with_items:
     - "{{ openssl_pki_certs_dir }}"
@@ -20,6 +21,7 @@
     - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private"
 
 - name: Index files
+  delegate_to: localhost
   file: "dest={{ item }} state=touch"
   with_items:
     - "{{ openssl_pki_certs_dir }}/ca/index.txt"
@@ -27,6 +29,7 @@
     - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/ca-chain.cert.pem"
 
 - name: Serial files
+  delegate_to: localhost
   copy: src=serial dest="{{ item }}" force=no
   with_items:
     - "{{ openssl_pki_certs_dir }}/ca/serial"
@@ -34,45 +37,54 @@
     - "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/crlnumber"
 
 - name: OpenSSL root config
+  delegate_to: localhost
   template:
     src: root_openssl.cnf.j2
     dest: "{{ openssl_pki_certs_dir }}/ca/openssl.cnf"
 
 - name: OpenSSL intermediate config
+  delegate_to: localhost
   template:
     src: intermediate_openssl.cnf.j2
     dest: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf"
 
 - name: Generate root key
+  delegate_to: localhost
   command: "openssl genrsa -out {{ openssl_pki_certs_dir }}/ca/private/ca.key.pem 4096"
   args:
     creates: "{{ openssl_pki_certs_dir }}/ca/private/ca.key.pem"
 
 - name: Generate root certificate
+  delegate_to: localhost
   command: "openssl req -config {{ openssl_pki_certs_dir }}/ca/openssl.cnf -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_certs_dir }}/ca/private/ca.key.pem -new -x509 -days 7300 -sha256 -extensions v3_ca -out {{ openssl_pki_certs_dir }}/ca/certs/ca.cert.pem"
   args:
     creates: "{{ openssl_pki_certs_dir }}/ca/certs/ca.cert.pem"
 
 - name: Generate intermediate key
+  delegate_to: localhost
   command: "openssl genrsa -out {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem 4096"
   args:
     creates: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem"
 
 - name: Generate intermediate csr
+  delegate_to: localhost
   command: "openssl req -config {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf -new -sha256 -subj {{ openssl_pki_intermediate_fields }} -key {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem -out {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
   args:
     creates: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
 
 - name: Generate intermediate certificate
+  delegate_to: localhost
   command: "openssl ca -batch -config {{ openssl_pki_certs_dir }}/ca/openssl.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha256 -in {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem -out {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
   args:
     creates: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
 
 - name: Generate intermediate chain
+  delegate_to: localhost
   template:
     src: ca-chain.cert.pem.j2
     dest: "{{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/ca-chain.cert.pem"
 
 - name: Validate root and intermediate certs
+  delegate_to: localhost
   command: "openssl verify -CAfile {{ openssl_pki_certs_dir }}/ca/certs/ca.cert.pem {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
   changed_when: false
