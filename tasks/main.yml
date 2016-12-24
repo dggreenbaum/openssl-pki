@@ -88,3 +88,22 @@
   delegate_to: localhost
   command: "openssl verify -CAfile {{ openssl_pki_certs_dir }}/ca/certs/ca.cert.pem {{ openssl_pki_certs_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
   changed_when: false
+
+- name: Server directories
+  file: "dest={{ item }} state=directory"
+  with_items:
+    - "{{ openssl_pki_certs_dir }}"
+    - "{{ openssl_pki_certs_dir }}/ca"
+
+- name: Write SSL conf to servers
+  template:
+    src: intermediate_openssl.cnf.j2
+    dest: "{{ openssl_pki_certs_dir }}/ca/openssl-server.cnf"
+
+- name: Generate server keys
+  command: "openssl genrsa -out {{ openssl_pki_certs_dir }}/ca/{{ item }}.key.pem 2048"
+  with_items: "{{ openssl_pki_server_common_names }}"
+
+- name: Generate server CSRs
+  command: "openssl req -config {{ openssl_pki_certs_dir }}/ca/openssl-server.cnf -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_certs_dir }}/ca/{{ item }}.key.pem -new -sha256 -out {{ openssl_pki_certs_dir }}/ca/{{ item }}.csr.pem"
+  with_items: "{{ openssl_pki_server_common_names }}"
