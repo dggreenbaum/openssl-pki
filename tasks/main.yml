@@ -102,8 +102,12 @@
 
 - name: Generate server keys
   command: "openssl genrsa -out {{ openssl_pki_certs_dir }}/ca/{{ item }}.key.pem 2048"
+  args:
+    creates: "{{ openssl_pki_certs_dir }}/ca/{{ item }}.key.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Generate server CSRs
   command: "openssl req -config {{ openssl_pki_certs_dir }}/ca/openssl-server.cnf -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_certs_dir }}/ca/{{ item }}.key.pem -new -sha256 -out {{ openssl_pki_certs_dir }}/ca/{{ item }}.csr.pem"
+  args:
+    creates: "{{ openssl_pki_certs_dir }}/ca/{{ item }}.csr.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
