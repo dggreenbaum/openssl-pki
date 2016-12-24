@@ -5,7 +5,9 @@ openssl_pki_os_packages:
   - openssl
 
 openssl_pki_intermediate_ca_name: "intermediate"
-openssl_pki_certs_dir: "{{ ansible_env.HOME }}"
+
+openssl_pki_certs_ca_dir: "{{ ansible_env.HOME }}/ca"
+openssl_pki_certs_server_dir: "{{ ansible_env.HOME }}/srv"
 
 openssl_pki_country: "US"
 openssl_pki_locality: "Phoenix"
