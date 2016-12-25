@@ -57,7 +57,7 @@
 
 - name: Generate root certificate
   delegate_to: localhost
-  command: "openssl req -config {{ openssl_pki_certs_ca_dir }}/ca/openssl.cnf -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_certs_ca_dir }}/ca/private/ca.key.pem -new -x509 -days 7300 -sha256 -extensions v3_ca -out {{ openssl_pki_certs_ca_dir }}/ca/certs/ca.cert.pem"
+  command: "openssl req -config {{ openssl_pki_certs_ca_dir }}/ca/openssl.cnf -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_certs_ca_dir }}/ca/private/ca.key.pem -new -x509 -days {{ openssl_pki_ca_days }} -{{ openssl_pki_hash_type }} -extensions v3_ca -out {{ openssl_pki_certs_ca_dir }}/ca/certs/ca.cert.pem"
   args:
     creates: "{{ openssl_pki_certs_ca_dir }}/ca/certs/ca.cert.pem"
 
@@ -69,13 +69,13 @@
 
 - name: Generate intermediate csr
   delegate_to: localhost
-  command: "openssl req -config {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf -new -sha256 -subj {{ openssl_pki_intermediate_fields }} -key {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem -out {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
+  command: "openssl req -config {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf -new -{{ openssl_pki_hash_type }} -subj {{ openssl_pki_intermediate_fields }} -key {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem -out {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
   args:
     creates: "{{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
 
 - name: Generate intermediate certificate
   delegate_to: localhost
-  command: "openssl ca -batch -config {{ openssl_pki_certs_ca_dir }}/ca/openssl.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha256 -in {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem -out {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
+  command: "openssl ca -batch -config {{ openssl_pki_certs_ca_dir }}/ca/openssl.cnf -extensions v3_intermediate_ca -days {{ openssl_pki_intermediate_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem -out {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
   args:
     creates: "{{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
 
@@ -108,7 +108,7 @@
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Generate server CSRs
-  command: "openssl req -config {{ openssl_pki_certs_server_dir }}/ca/openssl.cnf -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_certs_server_dir }}/ca/{{ item }}.key.pem -new -sha256 -out {{ openssl_pki_certs_server_dir }}/ca/{{ item }}.csr.pem"
+  command: "openssl req -config {{ openssl_pki_certs_server_dir }}/ca/openssl.cnf -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_certs_server_dir }}/ca/{{ item }}.key.pem -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_certs_server_dir }}/ca/{{ item }}.csr.pem"
   args:
     creates: "{{ openssl_pki_certs_server_dir }}/ca/{{ item }}.csr.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
@@ -128,7 +128,7 @@
 
 - name: Generate server certificates
   delegate_to: localhost
-  command: "openssl ca -batch -config {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf -extensions server_cert -days 365 -notext -md sha256 -in {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ item[1] }}/{{ openssl_pki_certs_server_dir }}/ca/{{ item[0] }}.csr.pem -out {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
+  command: "openssl ca -batch -config {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/csr/{{ item[1] }}/{{ openssl_pki_certs_server_dir }}/ca/{{ item[0] }}.csr.pem -out {{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
   args:
     creates: "{{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
   with_nested:
@@ -142,3 +142,9 @@
   with_nested:
     - "{{ openssl_pki_server_common_names }}"
     - "{{ ansible_play_hosts }}"
+
+- name: Put signed certs on servers
+  copy:
+    src: "{{ openssl_pki_certs_ca_dir }}/ca/{{ openssl_pki_intermediate_ca_name }}/certs/{{ inventory_hostname }}/{{ item }}.cert.pem"
+    dest: "{{ openssl_pki_certs_server_dir }}/ca/{{ item }}.cert.pem"
+  with_items: "{{ openssl_pki_server_common_names }}"
