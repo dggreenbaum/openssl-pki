@@ -4,13 +4,11 @@
 openssl_pki_os_packages:
   - openssl
 
+openssl_pki_certs_ca_root_dir: "{{ ansible_env.HOME }}/ca"
+openssl_pki_certs_server_root_dir: "{{ ansible_env.HOME }}/srv"
+
 openssl_pki_ca_name: "ca"
 openssl_pki_intermediate_ca_name: "intermediate"
-
-# The root directory where the CA and intermediate CA are located on the Ansible controller
-openssl_pki_certs_ca_root_dir: "{{ ansible_env.HOME }}/ca"
-# The root directory where the certs, csrs, and keys are stored on managed servers
-openssl_pki_certs_server_root_dir: "{{ ansible_env.HOME }}/srv"
 
 openssl_pki_country: "US"
 openssl_pki_locality: "Phoenix"
@@ -30,19 +28,23 @@ openssl_pki_server_common_names:
   - "{{ inventory_hostname }}"
   - "example.com"
 
+openssl_pki_ca_path: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}"
+openssl_pki_intermediate_ca_path: "{{ openssl_pki_ca_path }}/{{ openssl_pki_intermediate_ca_name }}"
+openssl_pki_server_ca_path: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}"
+
 openssl_pki_common_fields: "/C={{ openssl_pki_country }}/ST={{ openssl_pki_state }}/L={{ openssl_pki_locality }}/O={{ openssl_pki_organization }}"
 openssl_pki_ca_fields: "{{ openssl_pki_common_fields }}/CN={{ openssl_pki_ca_common_name }}"
 openssl_pki_intermediate_fields: "{{ openssl_pki_common_fields }}/CN={{ openssl_pki_intermediate_common_name }}"
 
-openssl_pki_root_config: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/openssl.cnf"
-openssl_pki_intermediate_config: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf"
+openssl_pki_root_config: "{{ openssl_pki_ca_path }}/openssl.cnf"
+openssl_pki_intermediate_config: "{{ openssl_pki_intermediate_ca_path }}/openssl.cnf"
 openssl_pki_server_config: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/openssl.cnf"
 
-openssl_pki_root_key: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/private/{{ openssl_pki_ca_name }}.key.pem"
-openssl_pki_root_cert: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/certs/{{ openssl_pki_ca_name }}.cert.pem"
+openssl_pki_root_key: "{{ openssl_pki_ca_path }}/private/{{ openssl_pki_ca_name }}.key.pem"
+openssl_pki_root_cert: "{{ openssl_pki_ca_path }}/certs/{{ openssl_pki_ca_name }}.cert.pem"
 
-openssl_pki_intermediate_key: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem"
-openssl_pki_intermediate_csr: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
-openssl_pki_intermediate_cert: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
+openssl_pki_intermediate_key: "{{ openssl_pki_intermediate_ca_path }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem"
+openssl_pki_intermediate_csr: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
+openssl_pki_intermediate_cert: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
 
-openssl_pki_intermediate_chain: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ openssl_pki_ca_name }}-chain.cert.pem"
+openssl_pki_intermediate_chain: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ openssl_pki_ca_name }}-chain.cert.pem"

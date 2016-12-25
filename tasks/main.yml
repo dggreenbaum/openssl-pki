@@ -94,7 +94,7 @@
   file: "dest={{ item }} state=directory"
   with_items:
     - "{{ openssl_pki_certs_server_root_dir }}"
-    - "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}"
+    - "{{ openssl_pki_server_ca_path  }}"
 
 - name: Write SSL conf to servers
   template:
@@ -102,20 +102,20 @@
     dest: "{{ openssl_pki_server_config }}"
 
 - name: Generate server keys
-  command: "openssl genrsa -out {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.key.pem 2048"
+  command: "openssl genrsa -out {{ openssl_pki_server_ca_path  }}/{{ item }}.key.pem 2048"
   args:
-    creates: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.key.pem"
+    creates: "{{ openssl_pki_server_ca_path  }}/{{ item }}.key.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Generate server CSRs
-  command: "openssl req -config {{ openssl_pki_server_config }} -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.key.pem -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.csr.pem"
+  command: "openssl req -config {{ openssl_pki_server_config }} -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_server_ca_path  }}/{{ item }}.key.pem -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_server_ca_path  }}/{{ item }}.csr.pem"
   args:
-    creates: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.csr.pem"
+    creates: "{{ openssl_pki_server_ca_path  }}/{{ item }}.csr.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Copy server CSRs to controller
   fetch:
-    src: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.csr.pem"
+    src: "{{ openssl_pki_server_ca_path  }}/{{ item }}.csr.pem"
     dest: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/csr/"
     fail_on_missing: yes
   with_items: "{{ openssl_pki_server_common_names }}"
@@ -128,7 +128,7 @@
 
 - name: Generate server certificates
   delegate_to: localhost
-  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/csr/{{ item[1] }}/{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item[0] }}.csr.pem -out {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
+  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/csr/{{ item[1] }}/{{ openssl_pki_server_ca_path  }}/{{ item[0] }}.csr.pem -out {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
   args:
     creates: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
   with_nested:
@@ -146,5 +146,5 @@
 - name: Put signed certs on servers
   copy:
     src: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ inventory_hostname }}/{{ item }}.cert.pem"
-    dest: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.cert.pem"
+    dest: "{{ openssl_pki_server_ca_path  }}/{{ item }}.cert.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
