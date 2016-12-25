@@ -8,24 +8,24 @@
   file: "dest={{ item }} state=directory"
   with_items:
     - "{{ openssl_pki_certs_ca_root_dir }}"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/certs"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/crl"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/newcerts"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/private"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/certs"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/crl"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/csr"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/newcerts"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/private"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/certs"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/crl"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/newcerts"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/private"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/crl"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/csr"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/newcerts"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/private"
 
 - name: Index files
   delegate_to: localhost
   file: "dest={{ item }} state=touch"
   with_items:
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/index.txt"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/index.txt"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/index.txt"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/index.txt"
     - "{{ openssl_pki_intermediate_chain }}"
   changed_when: false
 
@@ -33,9 +33,9 @@
   delegate_to: localhost
   copy: src=serial dest="{{ item }}" force=no
   with_items:
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/serial"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/serial"
-    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/crlnumber"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/serial"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/serial"
+    - "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/crlnumber"
 
 - name: OpenSSL root config
   delegate_to: localhost
@@ -94,50 +94,50 @@
   file: "dest={{ item }} state=directory"
   with_items:
     - "{{ openssl_pki_certs_server_root_dir }}"
-    - "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}"
+    - "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}"
 
 - name: Write SSL conf to servers
   template:
     src: intermediate_openssl.cnf.j2
-    dest: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/openssl.cnf"
+    dest: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/openssl.cnf"
 
 - name: Generate server keys
-  command: "openssl genrsa -out {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/{{ item }}.key.pem 2048"
+  command: "openssl genrsa -out {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.key.pem 2048"
   args:
-    creates: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/{{ item }}.key.pem"
+    creates: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.key.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Generate server CSRs
-  command: "openssl req -config {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/openssl.cnf -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/{{ item }}.key.pem -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/{{ item }}.csr.pem"
+  command: "openssl req -config {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/openssl.cnf -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.key.pem -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.csr.pem"
   args:
-    creates: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/{{ item }}.csr.pem"
+    creates: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.csr.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Copy server CSRs to controller
   fetch:
-    src: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/{{ item }}.csr.pem"
-    dest: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/csr/"
+    src: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.csr.pem"
+    dest: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/csr/"
     fail_on_missing: yes
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Make server certificate destination directories
   delegate_to: localhost
-  file: "dest={{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item }} state=directory"
+  file: "dest={{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item }} state=directory"
   with_items:
     - "{{ ansible_play_hosts }}"
 
 - name: Generate server certificates
   delegate_to: localhost
-  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/csr/{{ item[1] }}/{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/{{ item[0] }}.csr.pem -out {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
+  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/csr/{{ item[1] }}/{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item[0] }}.csr.pem -out {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
   args:
-    creates: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
+    creates: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
   with_nested:
     - "{{ openssl_pki_server_common_names }}"
     - "{{ ansible_play_hosts }}"
 
 - name: Validate server certs with chain
   delegate_to: localhost
-  command: "openssl verify -CAfile {{ openssl_pki_intermediate_chain }} {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
+  command: "openssl verify -CAfile {{ openssl_pki_intermediate_chain }} {{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
   changed_when: false
   with_nested:
     - "{{ openssl_pki_server_common_names }}"
@@ -145,6 +145,6 @@
 
 - name: Put signed certs on servers
   copy:
-    src: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_dir }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ inventory_hostname }}/{{ item }}.cert.pem"
-    dest: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_dir }}/{{ item }}.cert.pem"
+    src: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/certs/{{ inventory_hostname }}/{{ item }}.cert.pem"
+    dest: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/{{ item }}.cert.pem"
   with_items: "{{ openssl_pki_server_common_names }}"
