@@ -24,7 +24,7 @@
   delegate_to: localhost
   file:
     path: "{{ item }}"
-    mode: 0700
+    mode: "{{ openssl_pki_private_dir_mode }}"
   with_items:
     - "{{ openssl_pki_ca_path }}/private"
     - "{{ openssl_pki_intermediate_ca_path }}/private"
@@ -68,7 +68,7 @@
   delegate_to: localhost
   file:
     path: "{{ openssl_pki_root_key }}"
-    mode: 0400
+    mode: "{{ openssl_pki_root_key_mode }}"
 
 - name: Generate root certificate
   delegate_to: localhost
@@ -80,7 +80,7 @@
   delegate_to: localhost
   file:
     path: "{{ openssl_pki_root_cert }}"
-    mode: 0444
+    mode: "{{ openssl_pki_root_cert_mode }}"
 
 - name: Generate intermediate key
   delegate_to: localhost
@@ -92,7 +92,7 @@
   delegate_to: localhost
   file:
     path: "{{ openssl_pki_intermediate_key }}"
-    mode: 0400
+    mode: "{{ openssl_pki_intermediate_key_mode }}"
 
 - name: Generate intermediate csr
   delegate_to: localhost
@@ -110,7 +110,7 @@
   delegate_to: localhost
   file:
     path: "{{ openssl_pki_intermediate_cert }}"
-    mode: 0444
+    mode: "{{ openssl_pki_intermediate_cert_mode }}"
 
 - name: Generate intermediate chain
   delegate_to: localhost
@@ -122,7 +122,7 @@
   delegate_to: localhost
   file:
     path: "{{ openssl_pki_intermediate_chain }}"
-    mode: 0444
+    mode: "{{ openssl_pki_intermediate_chain_mode }}"
 
 - name: Validate root and intermediate certs
   delegate_to: localhost
@@ -149,7 +149,7 @@
 - name: Set permissions for server keys
   file:
     path: "{{ openssl_pki_server_ca_path }}/{{ item }}.key.pem"
-    mode: 0400
+    mode: "{{ openssl_pki_server_key_mode }}"
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Generate server CSRs
@@ -197,5 +197,5 @@
 - name: Set permissions for server certificates
   file:
     path: "{{ openssl_pki_server_ca_path }}/{{ item }}.cert.pem"
-    mode: 0444
+    mode: "{{ openssl_pki_server_cert_mode }}"
   with_items: "{{ openssl_pki_server_common_names }}"

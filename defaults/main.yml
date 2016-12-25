@@ -4,30 +4,37 @@
 openssl_pki_os_packages:
   - openssl
 
+# CA location
 openssl_pki_certs_ca_root_dir: "{{ ansible_env.HOME }}/ca"
 openssl_pki_certs_server_root_dir: "{{ ansible_env.HOME }}/srv"
 
 openssl_pki_ca_name: "ca"
 openssl_pki_intermediate_ca_name: "intermediate"
 
+# Cert fields
 openssl_pki_country: "US"
 openssl_pki_locality: "Phoenix"
 openssl_pki_organization: "Example\\ LLC"
 openssl_pki_state: "Arizona"
 
-openssl_pki_server_cert_days: "365"
-openssl_pki_intermediate_cert_days: "3650"
-openssl_pki_ca_days: "7300"
-
-openssl_pki_hash_type: "sha256"
-
+# CA Common Names
 openssl_pki_ca_common_name: "Example\\ LLC\\ Certificate\\ Authority"
 openssl_pki_intermediate_common_name: "Example\\ LLC\\ Intermediate\\ Certificate\\ Authority"
 
+# Server Common Names
 openssl_pki_server_common_names:
   - "{{ inventory_hostname }}"
   - "example.com"
 
+# Cert lifespan
+openssl_pki_server_cert_days: "365"
+openssl_pki_intermediate_cert_days: "3650"
+openssl_pki_ca_days: "7300"
+
+# Hashing method
+openssl_pki_hash_type: "sha256"
+
+# File paths
 openssl_pki_ca_path: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}"
 openssl_pki_intermediate_ca_path: "{{ openssl_pki_ca_path }}/{{ openssl_pki_intermediate_ca_name }}"
 openssl_pki_server_ca_path: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}"
@@ -48,3 +55,17 @@ openssl_pki_intermediate_csr: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ ope
 openssl_pki_intermediate_cert: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
 
 openssl_pki_intermediate_chain: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ openssl_pki_ca_name }}-chain.cert.pem"
+
+# File modes
+openssl_pki_private_dir_mode: "0700"
+
+openssl_pki_root_key_mode: "0400"
+openssl_pki_root_cert_mode: "0444"
+
+openssl_pki_intermediate_key_mode: "0400"
+openssl_pki_intermediate_cert_mode: "0444"
+
+openssl_pki_intermediate_chain_mode: "0444"
+
+openssl_pki_server_key_mode: "0400"
+openssl_pki_server_cert_mode: "0444"
