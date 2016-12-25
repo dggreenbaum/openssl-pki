@@ -36,6 +36,7 @@ openssl_pki_intermediate_fields: "{{ openssl_pki_common_fields }}/CN={{ openssl_
 
 openssl_pki_root_config: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/openssl.cnf"
 openssl_pki_intermediate_config: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/{{ openssl_pki_intermediate_ca_name }}/openssl.cnf"
+openssl_pki_server_config: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/openssl.cnf"
 
 openssl_pki_root_key: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/private/{{ openssl_pki_ca_name }}.key.pem"
 openssl_pki_root_cert: "{{ openssl_pki_certs_ca_root_dir }}/{{ openssl_pki_ca_name }}/certs/{{ openssl_pki_ca_name }}.cert.pem"
