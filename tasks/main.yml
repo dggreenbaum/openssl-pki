@@ -20,6 +20,15 @@
     - "{{ openssl_pki_intermediate_ca_path }}/newcerts"
     - "{{ openssl_pki_intermediate_ca_path }}/private"
 
+- name: Set permissions for private directories
+  delegate_to: localhost
+  file:
+    path: "{{ item }}"
+    mode: 0700
+  with_items:
+    - "{{ openssl_pki_ca_path }}/private"
+    - "{{ openssl_pki_intermediate_ca_path }}/private"
+
 - name: Index files
   delegate_to: localhost
   file: "dest={{ item }} state=touch"
@@ -55,17 +64,35 @@
   args:
     creates: "{{ openssl_pki_root_key }}"
 
+- name: Set permissions for root ca key
+  delegate_to: localhost
+  file:
+    path: "{{ openssl_pki_root_key }}"
+    mode: 0400
+
 - name: Generate root certificate
   delegate_to: localhost
   command: "openssl req -config {{ openssl_pki_root_config }} -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_root_key }} -new -x509 -days {{ openssl_pki_ca_days }} -{{ openssl_pki_hash_type }} -extensions v3_ca -out {{ openssl_pki_root_cert }}"
   args:
     creates: "{{ openssl_pki_root_cert }}"
 
+- name: Set permissions for root certificate
+  delegate_to: localhost
+  file:
+    path: "{{ openssl_pki_root_cert }}"
+    mode: 0444
+
 - name: Generate intermediate key
   delegate_to: localhost
   command: "openssl genrsa -out {{ openssl_pki_intermediate_key }} 4096"
   args:
     creates: "{{ openssl_pki_intermediate_key }}"
+
+- name: Set permissions for intermediate key
+  delegate_to: localhost
+  file:
+    path: "{{ openssl_pki_intermediate_key }}"
+    mode: 0400
 
 - name: Generate intermediate csr
   delegate_to: localhost
@@ -79,11 +106,23 @@
   args:
     creates: "{{ openssl_pki_intermediate_cert }}"
 
+- name: Set permissions for intermediate certificate
+  delegate_to: localhost
+  file:
+    path: "{{ openssl_pki_intermediate_cert }}"
+    mode: 0444
+
 - name: Generate intermediate chain
   delegate_to: localhost
   template:
     src: ca-chain.cert.pem.j2
     dest: "{{ openssl_pki_intermediate_chain }}"
+
+- name: Set permissions for intermediate chain
+  delegate_to: localhost
+  file:
+    path: "{{ openssl_pki_intermediate_chain }}"
+    mode: 0444
 
 - name: Validate root and intermediate certs
   delegate_to: localhost
@@ -105,6 +144,12 @@
   command: "openssl genrsa -out {{ openssl_pki_server_ca_path }}/{{ item }}.key.pem 2048"
   args:
     creates: "{{ openssl_pki_server_ca_path }}/{{ item }}.key.pem"
+  with_items: "{{ openssl_pki_server_common_names }}"
+
+- name: Set permissions for server keys
+  file:
+    path: "{{ openssl_pki_server_ca_path }}/{{ item }}.key.pem"
+    mode: 0400
   with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Generate server CSRs
@@ -135,7 +180,7 @@
     - "{{ openssl_pki_server_common_names }}"
     - "{{ ansible_play_hosts }}"
 
-- name: Validate server certs with chain
+- name: Validate server certificates with chain
   delegate_to: localhost
   command: "openssl verify -CAfile {{ openssl_pki_intermediate_chain }} {{ openssl_pki_intermediate_ca_path }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
   changed_when: false
@@ -143,8 +188,14 @@
     - "{{ openssl_pki_server_common_names }}"
     - "{{ ansible_play_hosts }}"
 
-- name: Put signed certs on servers
+- name: Put signed certificates on servers
   copy:
     src: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ inventory_hostname }}/{{ item }}.cert.pem"
     dest: "{{ openssl_pki_server_ca_path }}/{{ item }}.cert.pem"
+  with_items: "{{ openssl_pki_server_common_names }}"
+
+- name: Set permissions for server certificates
+  file:
+    path: "{{ openssl_pki_server_ca_path }}/{{ item }}.cert.pem"
+    mode: 0444
   with_items: "{{ openssl_pki_server_common_names }}"
