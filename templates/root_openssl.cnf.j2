@@ -4,7 +4,7 @@ default_ca = CA_default
 
 [ CA_default ]
 # Directory and file locations.
-dir               = {{ openssl_pki_certs_ca_dir }}/ca
+dir               = {{ openssl_pki_certs_ca_root_dir }}/ca
 certs             = $dir/certs
 crl_dir           = $dir/crl
 new_certs_dir     = $dir/newcerts
