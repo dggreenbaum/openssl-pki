@@ -29,105 +29,139 @@
     - "{{ openssl_pki_ca_path }}/private"
     - "{{ openssl_pki_intermediate_ca_path }}/private"
 
-- name: Index files
+- name: Look for existing certificates and keys
   delegate_to: localhost
-  file: "dest={{ item }} state=touch"
+  stat:
+    path: "{{ item }}"
+  register: "openssl_pki_stat_existing"
   with_items:
-    - "{{ openssl_pki_ca_path }}/index.txt"
-    - "{{ openssl_pki_intermediate_ca_path }}/index.txt"
+    - "{{ openssl_pki_root_key }}"
+    - "{{ openssl_pki_root_cert }}"
+    - "{{ openssl_pki_intermediate_key }}"
+    - "{{ openssl_pki_intermediate_cert }}"
     - "{{ openssl_pki_intermediate_chain }}"
-  changed_when: false
 
-- name: Serial files
+- block:
+  - name: Index files
+    delegate_to: localhost
+    file: "dest={{ item }} state=touch"
+    with_items:
+      - "{{ openssl_pki_ca_path }}/index.txt"
+      - "{{ openssl_pki_intermediate_ca_path }}/index.txt"
+    changed_when: false
+
+  - name: Serial files
+    delegate_to: localhost
+    copy: src=serial dest="{{ item }}" force=no
+    with_items:
+      - "{{ openssl_pki_ca_path }}/serial"
+      - "{{ openssl_pki_intermediate_ca_path }}/serial"
+      - "{{ openssl_pki_intermediate_ca_path }}/crlnumber"
+
+  - name: OpenSSL root config
+    delegate_to: localhost
+    template:
+      src: root_openssl.cnf.j2
+      dest: "{{ openssl_pki_root_config }}"
+
+  - name: OpenSSL intermediate config
+    delegate_to: localhost
+    template:
+      src: intermediate_openssl.cnf.j2
+      dest: "{{ openssl_pki_intermediate_config }}"
+  - name: Generate root key
+    delegate_to: localhost
+    command: "openssl genrsa -out {{ openssl_pki_root_key }} 4096"
+    args:
+      creates: "{{ openssl_pki_root_key }}"
+
+  - name: Set permissions for root ca key
+    delegate_to: localhost
+    file:
+      path: "{{ openssl_pki_root_key }}"
+      mode: "{{ openssl_pki_root_key_mode }}"
+
+  - name: Generate root certificate
+    delegate_to: localhost
+    command: "openssl req -config {{ openssl_pki_root_config }} -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_root_key }} -new -x509 -days {{ openssl_pki_ca_days }} -{{ openssl_pki_hash_type }} -extensions v3_ca -out {{ openssl_pki_root_cert }}"
+    args:
+      creates: "{{ openssl_pki_root_cert }}"
+
+  - name: Set permissions for root certificate
+    delegate_to: localhost
+    file:
+      path: "{{ openssl_pki_root_cert }}"
+      mode: "{{ openssl_pki_root_cert_mode }}"
+
+  - name: Generate intermediate key
+    delegate_to: localhost
+    command: "openssl genrsa -out {{ openssl_pki_intermediate_key }} 4096"
+    args:
+      creates: "{{ openssl_pki_intermediate_key }}"
+
+  - name: Set permissions for intermediate key
+    delegate_to: localhost
+    file:
+      path: "{{ openssl_pki_intermediate_key }}"
+      mode: "{{ openssl_pki_intermediate_key_mode }}"
+
+  - name: Generate intermediate csr
+    delegate_to: localhost
+    command: "openssl req -config {{ openssl_pki_intermediate_config }} -new -{{ openssl_pki_hash_type }} -subj {{ openssl_pki_intermediate_fields }} -key {{ openssl_pki_intermediate_key }} -out {{ openssl_pki_intermediate_csr }}"
+    args:
+      creates: "{{ openssl_pki_intermediate_csr }}"
+
+  - name: Generate intermediate certificate
+    delegate_to: localhost
+    command: "openssl ca -batch -config {{ openssl_pki_root_config }} -extensions v3_intermediate_ca -days {{ openssl_pki_intermediate_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_csr }} -out {{ openssl_pki_intermediate_cert }}"
+    args:
+      creates: "{{ openssl_pki_intermediate_cert }}"
+
+  - name: Set permissions for intermediate certificate
+    delegate_to: localhost
+    file:
+      path: "{{ openssl_pki_intermediate_cert }}"
+      mode: "{{ openssl_pki_intermediate_cert_mode }}"
+
+  - name: Validate root and intermediate certs
+    delegate_to: localhost
+    command: "openssl verify -CAfile {{ openssl_pki_root_cert }} {{ openssl_pki_intermediate_cert }}"
+    changed_when: false
+
+  when:
+    - openssl_pki_stat_existing['results'][2]['stat']['exists'] == false
+    - openssl_pki_stat_existing['results'][3]['stat']['exists'] == false
+
+- name: Look for created certificates and keys
   delegate_to: localhost
-  copy: src=serial dest="{{ item }}" force=no
+  stat:
+    path: "{{ item }}"
+  register: "openssl_pki_stat_created"
   with_items:
-    - "{{ openssl_pki_ca_path }}/serial"
-    - "{{ openssl_pki_intermediate_ca_path }}/serial"
-    - "{{ openssl_pki_intermediate_ca_path }}/crlnumber"
+    - "{{ openssl_pki_root_key }}"
+    - "{{ openssl_pki_root_cert }}"
+    - "{{ openssl_pki_intermediate_key }}"
+    - "{{ openssl_pki_intermediate_cert }}"
 
-- name: OpenSSL root config
+- name: Fail if we don't have and can't make the ca-chain file.
   delegate_to: localhost
-  template:
-    src: root_openssl.cnf.j2
-    dest: "{{ openssl_pki_root_config }}"
-
-- name: OpenSSL intermediate config
-  delegate_to: localhost
-  template:
-    src: intermediate_openssl.cnf.j2
-    dest: "{{ openssl_pki_intermediate_config }}"
-
-- name: Generate root key
-  delegate_to: localhost
-  command: "openssl genrsa -out {{ openssl_pki_root_key }} 4096"
-  args:
-    creates: "{{ openssl_pki_root_key }}"
-
-- name: Set permissions for root ca key
-  delegate_to: localhost
-  file:
-    path: "{{ openssl_pki_root_key }}"
-    mode: "{{ openssl_pki_root_key_mode }}"
-
-- name: Generate root certificate
-  delegate_to: localhost
-  command: "openssl req -config {{ openssl_pki_root_config }} -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_root_key }} -new -x509 -days {{ openssl_pki_ca_days }} -{{ openssl_pki_hash_type }} -extensions v3_ca -out {{ openssl_pki_root_cert }}"
-  args:
-    creates: "{{ openssl_pki_root_cert }}"
-
-- name: Set permissions for root certificate
-  delegate_to: localhost
-  file:
-    path: "{{ openssl_pki_root_cert }}"
-    mode: "{{ openssl_pki_root_cert_mode }}"
-
-- name: Generate intermediate key
-  delegate_to: localhost
-  command: "openssl genrsa -out {{ openssl_pki_intermediate_key }} 4096"
-  args:
-    creates: "{{ openssl_pki_intermediate_key }}"
-
-- name: Set permissions for intermediate key
-  delegate_to: localhost
-  file:
-    path: "{{ openssl_pki_intermediate_key }}"
-    mode: "{{ openssl_pki_intermediate_key_mode }}"
-
-- name: Generate intermediate csr
-  delegate_to: localhost
-  command: "openssl req -config {{ openssl_pki_intermediate_config }} -new -{{ openssl_pki_hash_type }} -subj {{ openssl_pki_intermediate_fields }} -key {{ openssl_pki_intermediate_key }} -out {{ openssl_pki_intermediate_csr }}"
-  args:
-    creates: "{{ openssl_pki_intermediate_csr }}"
-
-- name: Generate intermediate certificate
-  delegate_to: localhost
-  command: "openssl ca -batch -config {{ openssl_pki_root_config }} -extensions v3_intermediate_ca -days {{ openssl_pki_intermediate_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_csr }} -out {{ openssl_pki_intermediate_cert }}"
-  args:
-    creates: "{{ openssl_pki_intermediate_cert }}"
-
-- name: Set permissions for intermediate certificate
-  delegate_to: localhost
-  file:
-    path: "{{ openssl_pki_intermediate_cert }}"
-    mode: "{{ openssl_pki_intermediate_cert_mode }}"
+  fail:
+    msg: "Please provide an intermediate key, intermediate cert, and ca-chain/root certificate. See README for more."
+  when:
+    - openssl_pki_stat_created['results'][2]['stat']['exists'] == false or openssl_pki_stat_created['results'][3]['stat']['exists'] == false or (openssl_pki_stat_existing['results'][4]['stat']['exists'] == false and openssl_pki_stat_created['results'][1]['stat']['exists'] == false)
 
 - name: Generate intermediate chain
   delegate_to: localhost
   template:
     src: ca-chain.cert.pem.j2
     dest: "{{ openssl_pki_intermediate_chain }}"
+  when: openssl_pki_stat_existing['results'][4]['stat']['exists'] == false
 
 - name: Set permissions for intermediate chain
   delegate_to: localhost
   file:
     path: "{{ openssl_pki_intermediate_chain }}"
     mode: "{{ openssl_pki_intermediate_chain_mode }}"
-
-- name: Validate root and intermediate certs
-  delegate_to: localhost
-  command: "openssl verify -CAfile {{ openssl_pki_root_cert }} {{ openssl_pki_intermediate_cert }}"
-  changed_when: false
 
 - name: Server directories
   file: "dest={{ item }} state=directory"
