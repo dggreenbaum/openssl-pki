@@ -9,6 +9,8 @@ openssl_pki_intermediate_ca_name: "intermediate"
 openssl_pki_certs_ca_dir: "{{ ansible_env.HOME }}/ca"
 openssl_pki_certs_server_dir: "{{ ansible_env.HOME }}/srv"
 
+openssl_pki_ca_dir: "ca"
+
 openssl_pki_country: "US"
 openssl_pki_locality: "Phoenix"
 openssl_pki_organization: "Example\\ LLC"
@@ -22,6 +24,7 @@ openssl_pki_hash_type: "sha256"
 
 openssl_pki_ca_common_name: "Example\\ LLC\\ Certificate\\ Authority"
 openssl_pki_intermediate_common_name: "Example\\ LLC\\ Intermediate\\ Certificate\\ Authority"
+
 openssl_pki_server_common_names:
   - "{{ inventory_hostname }}"
   - "example.com"
