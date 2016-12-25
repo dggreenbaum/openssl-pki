@@ -4,15 +4,13 @@
 openssl_pki_os_packages:
   - openssl
 
+openssl_pki_ca_name: "ca"
 openssl_pki_intermediate_ca_name: "intermediate"
 
 # The root directory where the CA and intermediate CA are located on the Ansible controller
 openssl_pki_certs_ca_root_dir: "{{ ansible_env.HOME }}/ca"
 # The root directory where the certs, csrs, and keys are stored on managed servers
 openssl_pki_certs_server_root_dir: "{{ ansible_env.HOME }}/srv"
-
-# The directory created inside of the CA or server root directory where certs are stored
-openssl_pki_ca_name: "ca"
 
 openssl_pki_country: "US"
 openssl_pki_locality: "Phoenix"
