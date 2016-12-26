@@ -207,20 +207,20 @@
 
 - name: Generate server certificates
   delegate_to: localhost
-  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_ca_path }}/csr/{{ item[1] }}/{{ openssl_pki_server_ca_path }}/{{ item[0] }}.csr.pem -out {{ openssl_pki_intermediate_ca_path }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
+  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_ca_path }}/csr/{{ item[0] }}/{{ openssl_pki_server_ca_path }}/{{ item[1] }}.csr.pem -out {{ openssl_pki_intermediate_ca_path }}/certs/{{ item[0] }}/{{ item[1] }}.cert.pem"
   args:
-    creates: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
+    creates: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ item[0] }}/{{ item[1] }}.cert.pem"
   with_nested:
-    - "{{ openssl_pki_server_common_names }}"
     - "{{ ansible_play_hosts }}"
+    - "{{ openssl_pki_server_common_names }}"
 
 - name: Validate server certificates with chain
   delegate_to: localhost
-  command: "openssl verify -CAfile {{ openssl_pki_intermediate_chain }} {{ openssl_pki_intermediate_ca_path }}/certs/{{ item[1] }}/{{ item[0] }}.cert.pem"
+  command: "openssl verify -CAfile {{ openssl_pki_intermediate_chain }} {{ openssl_pki_intermediate_ca_path }}/certs/{{ item[0] }}/{{ item[1] }}.cert.pem"
   changed_when: false
   with_nested:
-    - "{{ openssl_pki_server_common_names }}"
     - "{{ ansible_play_hosts }}"
+    - "{{ openssl_pki_server_common_names }}"
 
 - name: Put signed certificates on servers
   copy:
