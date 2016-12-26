@@ -1,5 +1,6 @@
 OpenSSL PKI
 =========
+[![Build Status](https://travis-ci.org/dggreenbaum/openssl-pki.svg?branch=master)](https://travis-ci.org/dggreenbaum/openssl-pki)
 
 This role sets up a root certificate authority (CA), an arbitrary number of intermediate CAs (EG for each environment), and an arbitrary number SSL/TLS keys and certificates signed by those  CAs.
 
