@@ -24,6 +24,10 @@ install:
 script:
   # Basic role syntax check
   - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
+  # Apply the role
+  - ansible-playbook tests/test.yml -i tests/inventory --connection=local
+  # Idempotence test
+  - "ansible-playbook tests/test.yml -i tests/inventory --connection=local | tee /tmp/output.txt; grep -q 'changed=0.*failed=0' /tmp/output.txt && (echo 'Idempotence test: pass' && exit 0) || (echo 'Idempotence test: fail' && exit 1)"
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/

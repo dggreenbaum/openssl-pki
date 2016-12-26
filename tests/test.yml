@@ -1,5 +1,4 @@
 ---
 - hosts: localhost
-  become: true
   roles:
     - openssl-pki
