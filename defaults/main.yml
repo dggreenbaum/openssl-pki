@@ -43,12 +43,12 @@ openssl_pki_common_fields: "/C={{ openssl_pki_country }}/ST={{ openssl_pki_state
 openssl_pki_ca_fields: "{{ openssl_pki_common_fields }}/CN={{ openssl_pki_ca_common_name }}"
 openssl_pki_intermediate_fields: "{{ openssl_pki_common_fields }}/CN={{ openssl_pki_intermediate_common_name }}"
 
-openssl_pki_root_config: "{{ openssl_pki_ca_path }}/openssl.cnf"
+openssl_pki_ca_config: "{{ openssl_pki_ca_path }}/openssl.cnf"
 openssl_pki_intermediate_config: "{{ openssl_pki_intermediate_ca_path }}/openssl.cnf"
 openssl_pki_server_config: "{{ openssl_pki_certs_server_root_dir }}/{{ openssl_pki_ca_name }}/openssl.cnf"
 
-openssl_pki_root_key: "{{ openssl_pki_ca_path }}/private/{{ openssl_pki_ca_name }}.key.pem"
-openssl_pki_root_cert: "{{ openssl_pki_ca_path }}/certs/{{ openssl_pki_ca_name }}.cert.pem"
+openssl_pki_ca_key: "{{ openssl_pki_ca_path }}/private/{{ openssl_pki_ca_name }}.key.pem"
+openssl_pki_ca_cert: "{{ openssl_pki_ca_path }}/certs/{{ openssl_pki_ca_name }}.cert.pem"
 
 openssl_pki_intermediate_key: "{{ openssl_pki_intermediate_ca_path }}/private/{{ openssl_pki_intermediate_ca_name }}.key.pem"
 openssl_pki_intermediate_csr: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
@@ -59,8 +59,8 @@ openssl_pki_intermediate_chain: "{{ openssl_pki_intermediate_ca_path }}/certs/{{
 # File modes
 openssl_pki_private_dir_mode: "0700"
 
-openssl_pki_root_key_mode: "0400"
-openssl_pki_root_cert_mode: "0444"
+openssl_pki_ca_key_mode: "0400"
+openssl_pki_ca_cert_mode: "0444"
 
 openssl_pki_intermediate_key_mode: "0400"
 openssl_pki_intermediate_cert_mode: "0444"

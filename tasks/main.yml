@@ -35,8 +35,8 @@
     path: "{{ item }}"
   register: "openssl_pki_stat_existing"
   with_items:
-    - "{{ openssl_pki_root_key }}"
-    - "{{ openssl_pki_root_cert }}"
+    - "{{ openssl_pki_ca_key }}"
+    - "{{ openssl_pki_ca_cert }}"
     - "{{ openssl_pki_intermediate_key }}"
     - "{{ openssl_pki_intermediate_cert }}"
     - "{{ openssl_pki_intermediate_chain }}"
@@ -62,7 +62,7 @@
     delegate_to: localhost
     template:
       src: root_openssl.cnf.j2
-      dest: "{{ openssl_pki_root_config }}"
+      dest: "{{ openssl_pki_ca_config }}"
 
   - name: OpenSSL intermediate config
     delegate_to: localhost
@@ -71,27 +71,27 @@
       dest: "{{ openssl_pki_intermediate_config }}"
   - name: Generate root key
     delegate_to: localhost
-    command: "openssl genrsa -out {{ openssl_pki_root_key }} 4096"
+    command: "openssl genrsa -out {{ openssl_pki_ca_key }} 4096"
     args:
-      creates: "{{ openssl_pki_root_key }}"
+      creates: "{{ openssl_pki_ca_key }}"
 
   - name: Set permissions for root ca key
     delegate_to: localhost
     file:
-      path: "{{ openssl_pki_root_key }}"
-      mode: "{{ openssl_pki_root_key_mode }}"
+      path: "{{ openssl_pki_ca_key }}"
+      mode: "{{ openssl_pki_ca_key_mode }}"
 
   - name: Generate root certificate
     delegate_to: localhost
-    command: "openssl req -config {{ openssl_pki_root_config }} -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_root_key }} -new -x509 -days {{ openssl_pki_ca_days }} -{{ openssl_pki_hash_type }} -extensions v3_ca -out {{ openssl_pki_root_cert }}"
+    command: "openssl req -config {{ openssl_pki_ca_config }} -subj {{ openssl_pki_ca_fields }} -key {{ openssl_pki_ca_key }} -new -x509 -days {{ openssl_pki_ca_days }} -{{ openssl_pki_hash_type }} -extensions v3_ca -out {{ openssl_pki_ca_cert }}"
     args:
-      creates: "{{ openssl_pki_root_cert }}"
+      creates: "{{ openssl_pki_ca_cert }}"
 
   - name: Set permissions for root certificate
     delegate_to: localhost
     file:
-      path: "{{ openssl_pki_root_cert }}"
-      mode: "{{ openssl_pki_root_cert_mode }}"
+      path: "{{ openssl_pki_ca_cert }}"
+      mode: "{{ openssl_pki_ca_cert_mode }}"
 
   - name: Generate intermediate key
     delegate_to: localhost
@@ -113,7 +113,7 @@
 
   - name: Generate intermediate certificate
     delegate_to: localhost
-    command: "openssl ca -batch -config {{ openssl_pki_root_config }} -extensions v3_intermediate_ca -days {{ openssl_pki_intermediate_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_csr }} -out {{ openssl_pki_intermediate_cert }}"
+    command: "openssl ca -batch -config {{ openssl_pki_ca_config }} -extensions v3_intermediate_ca -days {{ openssl_pki_intermediate_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_csr }} -out {{ openssl_pki_intermediate_cert }}"
     args:
       creates: "{{ openssl_pki_intermediate_cert }}"
 
@@ -125,7 +125,7 @@
 
   - name: Validate root and intermediate certs
     delegate_to: localhost
-    command: "openssl verify -CAfile {{ openssl_pki_root_cert }} {{ openssl_pki_intermediate_cert }}"
+    command: "openssl verify -CAfile {{ openssl_pki_ca_cert }} {{ openssl_pki_intermediate_cert }}"
     changed_when: false
 
   when:
@@ -138,8 +138,8 @@
     path: "{{ item }}"
   register: "openssl_pki_stat_created"
   with_items:
-    - "{{ openssl_pki_root_key }}"
-    - "{{ openssl_pki_root_cert }}"
+    - "{{ openssl_pki_ca_key }}"
+    - "{{ openssl_pki_ca_cert }}"
     - "{{ openssl_pki_intermediate_key }}"
     - "{{ openssl_pki_intermediate_cert }}"
 
