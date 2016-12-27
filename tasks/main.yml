@@ -210,6 +210,7 @@
   command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_ca_path }}/csr/{{ item[0] }}/{{ openssl_pki_server_ca_path }}/{{ item[1] }}.csr.pem -out {{ openssl_pki_intermediate_ca_path }}/certs/{{ item[0] }}/{{ item[1] }}.cert.pem"
   args:
     creates: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ item[0] }}/{{ item[1] }}.cert.pem"
+    removes: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ item[0] }}/{{ openssl_pki_server_ca_path }}/{{ item[1] }}.csr.pem"
   with_nested:
     - "{{ ansible_play_hosts }}"
     - "{{ openssl_pki_server_common_names }}"
