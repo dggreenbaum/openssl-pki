@@ -23,7 +23,7 @@ openssl_pki_intermediate_common_name: "Example\\ LLC\\ Intermediate\\ Certificat
 
 # Server Common Names
 openssl_pki_server_common_names:
-  - "{{ inventory_hostname }}"
+  - "{{ ansible_hostname }}"
   - "example.com"
 
 # Cert lifespan
