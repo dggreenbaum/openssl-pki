@@ -214,7 +214,7 @@
     - "{{ ansible_play_hosts }}"
     - "{{ openssl_pki_server_common_names }}"
   loop_control:
-    pause: "1"
+    pause: 1
 
 - name: Validate server certificates with chain
   delegate_to: localhost
