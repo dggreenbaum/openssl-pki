@@ -71,3 +71,8 @@ openssl_pki_intermediate_chain_mode: "0444"
 
 openssl_pki_server_key_mode: "0400"
 openssl_pki_server_cert_mode: "0444"
+
+# Key Strength
+opsnssl_pki_ca_key_strength: "4096"
+opsnssl_pki_intermediate_key_strength: "4096"
+opsnssl_pki_server_key_strength: "2048"

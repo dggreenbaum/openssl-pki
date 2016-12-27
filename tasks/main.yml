@@ -71,7 +71,7 @@
       dest: "{{ openssl_pki_intermediate_config }}"
   - name: Generate root key
     delegate_to: localhost
-    command: "openssl genrsa -out {{ openssl_pki_ca_key }} 4096"
+    command: "openssl genrsa -out {{ openssl_pki_ca_key }} {{ opsnssl_pki_ca_key_strength }}"
     args:
       creates: "{{ openssl_pki_ca_key }}"
 
@@ -95,7 +95,7 @@
 
   - name: Generate intermediate key
     delegate_to: localhost
-    command: "openssl genrsa -out {{ openssl_pki_intermediate_key }} 4096"
+    command: "openssl genrsa -out {{ openssl_pki_intermediate_key }} {{ opsnssl_pki_intermediate_key_strength }}"
     args:
       creates: "{{ openssl_pki_intermediate_key }}"
 
@@ -175,7 +175,7 @@
     dest: "{{ openssl_pki_server_config }}"
 
 - name: Generate server keys
-  command: "openssl genrsa -out {{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem 2048"
+  command: "openssl genrsa -out {{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem {{ opsnssl_pki_server_key_strength }}"
   args:
     creates: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem"
 
