@@ -171,33 +171,29 @@
 
 - name: Write SSL conf to servers
   template:
-    src: intermediate_openssl.cnf.j2
+    src: server_openssl.cnf.j2
     dest: "{{ openssl_pki_server_config }}"
 
 - name: Generate server keys
-  command: "openssl genrsa -out {{ openssl_pki_server_ca_path }}/{{ item }}.key.pem 2048"
+  command: "openssl genrsa -out {{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem 2048"
   args:
-    creates: "{{ openssl_pki_server_ca_path }}/{{ item }}.key.pem"
-  with_items: "{{ openssl_pki_server_common_names }}"
+    creates: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem"
 
 - name: Set permissions for server keys
   file:
-    path: "{{ openssl_pki_server_ca_path }}/{{ item }}.key.pem"
+    path: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem"
     mode: "{{ openssl_pki_server_key_mode }}"
-  with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Generate server CSRs
-  command: "openssl req -config {{ openssl_pki_server_config }} -subj {{ openssl_pki_common_fields }}/CN={{ item }} -key {{ openssl_pki_server_ca_path }}/{{ item }}.key.pem -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_server_ca_path }}/{{ item }}.csr.pem"
+  command: "openssl req -config {{ openssl_pki_server_config }} -subj {{ openssl_pki_common_fields }}/CN={{ openssl_pki_server_common_name }} -key {{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
   args:
-    creates: "{{ openssl_pki_server_ca_path }}/{{ item }}.csr.pem"
-  with_items: "{{ openssl_pki_server_common_names }}"
+    creates: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
 
 - name: Copy server CSRs to controller
   fetch:
-    src: "{{ openssl_pki_server_ca_path }}/{{ item }}.csr.pem"
+    src: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
     dest: "{{ openssl_pki_intermediate_ca_path }}/csr/"
     fail_on_missing: yes
-  with_items: "{{ openssl_pki_server_common_names }}"
 
 - name: Make server certificate destination directories
   delegate_to: localhost
@@ -207,32 +203,28 @@
 
 - name: Generate server certificates
   delegate_to: localhost
-  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_ca_path }}/csr/{{ item[0] }}/{{ openssl_pki_server_ca_path }}/{{ item[1] }}.csr.pem -out {{ openssl_pki_intermediate_ca_path }}/certs/{{ item[0] }}/{{ item[1] }}.cert.pem"
+  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_ca_path }}/csr/{{ item }}/{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem -out {{ openssl_pki_intermediate_ca_path }}/certs/{{ item }}/{{ openssl_pki_server_common_name }}.cert.pem"
   args:
-    creates: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ item[0] }}/{{ item[1] }}.cert.pem"
-    removes: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ item[0] }}/{{ openssl_pki_server_ca_path }}/{{ item[1] }}.csr.pem"
-  with_nested:
+    creates: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ item }}/{{ openssl_pki_server_common_name }}.cert.pem"
+    removes: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ item }}/{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
+  with_items:
     - "{{ ansible_play_hosts }}"
-    - "{{ openssl_pki_server_common_names }}"
   loop_control:
     pause: 1
 
 - name: Validate server certificates with chain
   delegate_to: localhost
-  command: "openssl verify -CAfile {{ openssl_pki_intermediate_chain }} {{ openssl_pki_intermediate_ca_path }}/certs/{{ item[0] }}/{{ item[1] }}.cert.pem"
+  command: "openssl verify -CAfile {{ openssl_pki_intermediate_chain }} {{ openssl_pki_intermediate_ca_path }}/certs/{{ item }}/{{ openssl_pki_server_common_name }}.cert.pem"
   changed_when: false
-  with_nested:
+  with_items:
     - "{{ ansible_play_hosts }}"
-    - "{{ openssl_pki_server_common_names }}"
 
 - name: Put signed certificates on servers
   copy:
-    src: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ inventory_hostname }}/{{ item }}.cert.pem"
-    dest: "{{ openssl_pki_server_ca_path }}/{{ item }}.cert.pem"
-  with_items: "{{ openssl_pki_server_common_names }}"
+    src: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ inventory_hostname }}/{{ openssl_pki_server_common_name }}.cert.pem"
+    dest: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.cert.pem"
 
 - name: Set permissions for server certificates
   file:
-    path: "{{ openssl_pki_server_ca_path }}/{{ item }}.cert.pem"
+    path: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.cert.pem"
     mode: "{{ openssl_pki_server_cert_mode }}"
-  with_items: "{{ openssl_pki_server_common_names }}"

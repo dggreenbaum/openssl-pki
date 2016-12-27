@@ -21,9 +21,11 @@ openssl_pki_state: "Arizona"
 openssl_pki_ca_common_name: "Example\\ LLC\\ Certificate\\ Authority"
 openssl_pki_intermediate_common_name: "Example\\ LLC\\ Intermediate\\ Certificate\\ Authority"
 
-# Server Common Names
-openssl_pki_server_common_names:
-  - "{{ inventory_hostname }}"
+# Server Common Name
+openssl_pki_server_common_name: "{{ inventory_hostname }}"
+
+# Server Alternative Names
+openssl_pki_server_alternative_names:
   - "example.com"
 
 # Cert lifespan
