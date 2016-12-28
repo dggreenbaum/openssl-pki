@@ -58,12 +58,12 @@ galaxy_info:
   #  - 10
   #  - 6
   #  - 9
-  #- name: MacOSX
-  #  versions:
+  - name: MacOSX
+    versions:
   #  - all
   #  - 10.10
   #  - 10.11
-  #  - 10.12
+    - 10.12
   #  - 10.7
   #  - 10.8
   #  - 10.9
