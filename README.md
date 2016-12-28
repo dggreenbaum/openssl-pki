@@ -1,6 +1,6 @@
 OpenSSL PKI
 =========
-[![Build Status](https://travis-ci.org/dggreenbaum/openssl-pki.svg?branch=master)](https://travis-ci.org/dggreenbaum/openssl-pki)
+[![Ansible Galaxy](https://img.shields.io/badge/role-dggreenbaum.openssl--pki-blue.svg)](https://galaxy.ansible.com/dggreenbaum/openssl-pki/) [![Build Status](https://travis-ci.org/dggreenbaum/openssl-pki.svg?branch=master)](https://travis-ci.org/dggreenbaum/openssl-pki)
 
 This role sets up a root certificate authority (CA), an arbitrary number of intermediate CAs (EG for each environment), and an arbitrary number SSL/TLS keys and certificates signed by those  CAs.
 
