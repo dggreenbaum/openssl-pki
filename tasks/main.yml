@@ -201,6 +201,11 @@
   with_items:
     - "{{ ansible_play_hosts }}"
 
+- name: Put intermediate chain on servers
+  copy:
+    src: "{{ openssl_pki_intermediate_chain }}"
+    dest: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_ca_name }}-chain.cert.pem"
+
 - name: Generate server certificates
   delegate_to: localhost
   command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_ca_path }}/csr/{{ item }}/{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem -out {{ openssl_pki_intermediate_ca_path }}/certs/{{ item }}/{{ openssl_pki_server_common_name }}.cert.pem"
