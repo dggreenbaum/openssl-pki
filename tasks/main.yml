@@ -175,23 +175,23 @@
     dest: "{{ openssl_pki_server_config }}"
 
 - name: Generate server keys
-  command: "openssl genrsa -out {{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem {{ opsnssl_pki_server_key_strength }}"
+  command: "openssl genrsa -out {{ openssl_pki_server_key }} {{ opsnssl_pki_server_key_strength }}"
   args:
-    creates: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem"
+    creates: "{{ openssl_pki_server_key }}"
 
 - name: Set permissions for server keys
   file:
-    path: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem"
+    path: "{{ openssl_pki_server_key }}"
     mode: "{{ openssl_pki_server_key_mode }}"
 
 - name: Generate server CSRs
-  command: "openssl req -config {{ openssl_pki_server_config }} -subj {{ openssl_pki_common_fields }}/CN={{ openssl_pki_server_common_name }} -key {{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
+  command: "openssl req -config {{ openssl_pki_server_config }} -subj {{ openssl_pki_common_fields }}/CN={{ openssl_pki_server_common_name }} -key {{ openssl_pki_server_key }} -new -{{ openssl_pki_hash_type }} -out {{ openssl_pki_server_csr }}"
   args:
-    creates: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
+    creates: "{{ openssl_pki_server_csr }}"
 
 - name: Copy server CSRs to controller
   fetch:
-    src: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
+    src: "{{ openssl_pki_server_csr }}"
     dest: "{{ openssl_pki_intermediate_ca_path }}/csr/"
     fail_on_missing: yes
 
@@ -204,14 +204,14 @@
 - name: Put intermediate chain on servers
   copy:
     src: "{{ openssl_pki_intermediate_chain }}"
-    dest: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_ca_name }}-chain.cert.pem"
+    dest: "{{ openssl_pki_server_intermediate_chain }}"
 
 - name: Generate server certificates
   delegate_to: localhost
-  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_ca_path }}/csr/{{ item }}/{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem -out {{ openssl_pki_intermediate_ca_path }}/certs/{{ item }}/{{ openssl_pki_server_common_name }}.cert.pem"
+  command: "openssl ca -batch -config {{ openssl_pki_intermediate_config }} -extensions server_cert -days {{ openssl_pki_server_cert_days }} -notext -md {{ openssl_pki_hash_type }} -in {{ openssl_pki_intermediate_ca_path }}/csr/{{ item }}/{{ openssl_pki_server_csr }} -out {{ openssl_pki_intermediate_ca_path }}/certs/{{ item }}/{{ openssl_pki_server_common_name }}.cert.pem"
   args:
     creates: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ item }}/{{ openssl_pki_server_common_name }}.cert.pem"
-    removes: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ item }}/{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
+    removes: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ item }}/{{ openssl_pki_server_csr }}"
   with_items:
     - "{{ ansible_play_hosts }}"
   loop_control:
@@ -227,9 +227,9 @@
 - name: Put signed certificates on servers
   copy:
     src: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ inventory_hostname }}/{{ openssl_pki_server_common_name }}.cert.pem"
-    dest: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.cert.pem"
+    dest: "{{ openssl_pki_server_cert }}"
 
 - name: Set permissions for server certificates
   file:
-    path: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.cert.pem"
+    path: "{{ openssl_pki_server_cert }}"
     mode: "{{ openssl_pki_server_cert_mode }}"

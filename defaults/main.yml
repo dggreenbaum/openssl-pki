@@ -56,7 +56,12 @@ openssl_pki_intermediate_key: "{{ openssl_pki_intermediate_ca_path }}/private/{{
 openssl_pki_intermediate_csr: "{{ openssl_pki_intermediate_ca_path }}/csr/{{ openssl_pki_intermediate_ca_name }}.csr.pem"
 openssl_pki_intermediate_cert: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ openssl_pki_intermediate_ca_name }}.cert.pem"
 
+openssl_pki_server_key: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.key.pem"
+openssl_pki_server_csr: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.csr.pem"
+openssl_pki_server_cert: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_server_common_name }}.cert.pem"
+
 openssl_pki_intermediate_chain: "{{ openssl_pki_intermediate_ca_path }}/certs/{{ openssl_pki_ca_name }}-chain.cert.pem"
+openssl_pki_server_intermediate_chain: "{{ openssl_pki_server_ca_path }}/{{ openssl_pki_ca_name }}-chain.cert.pem"
 
 # File modes
 openssl_pki_private_dir_mode: "0700"
