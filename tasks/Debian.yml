@@ -1,5 +1,5 @@
 ---
 - name: Debian packages
-  become: true
+  become: "{{ lookup('env','ANSIBLE_BECOME') | default(true) }}"
   package: "name={{ item }} state=present"
   with_items: "{{ openssl_pki_os_packages }}"
