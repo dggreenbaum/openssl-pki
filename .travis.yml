@@ -11,6 +11,9 @@ addons:
     packages:
     - python-pip
 
+env:
+  - ANSIBLE_BECOME=false
+
 install:
   # Install ansible
   - pip install ansible
