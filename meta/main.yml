@@ -1,7 +1,6 @@
 galaxy_info:
-  author: your name
-  description: your description
-  company: your company (optional)
+  author: Doug Greenbaum
+  description: An Ansible role for creating and deploying a SSL infrastructure
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
@@ -14,9 +13,9 @@ galaxy_info:
   # - GPLv3
   # - Apache
   # - CC-BY
-  license: license (GPLv2, CC-BY, etc)
+  license: BSD
 
-  min_ansible_version: 1.2
+  min_ansible_version: 2.2
 
   # Optionally specify the branch Galaxy will use when accessing the GitHub
   # repo for this role. During role install, if no tags are available,
@@ -31,7 +30,7 @@ galaxy_info:
   # the ones that apply to your role. If you don't see your
   # platform on this list, let us know and we'll get it added!
   #
-  #platforms:
+  platforms:
   #- name: OpenBSD
   #  versions:
   #  - all
@@ -59,12 +58,12 @@ galaxy_info:
   #  - 10
   #  - 6
   #  - 9
-  #- name: MacOSX
-  #  versions:
+  - name: MacOSX
+    versions:
   #  - all
   #  - 10.10
   #  - 10.11
-  #  - 10.12
+    - 10.12
   #  - 10.7
   #  - 10.8
   #  - 10.9
@@ -125,8 +124,8 @@ galaxy_info:
   #  - 9.1
   #  - 9.2
   #  - 9.3
-  #- name: Ubuntu
-  #  versions:
+  - name: Ubuntu
+    versions:
   #  - all
   #  - lucid
   #  - maverick
@@ -140,7 +139,7 @@ galaxy_info:
   #  - utopic
   #  - vivid
   #  - wily
-  #  - xenial
+    - xenial
   #  - yakkety
   #- name: Debian
   #  versions:
@@ -207,7 +206,13 @@ galaxy_info:
   #  - all
   #  - Any
 
-  galaxy_tags: []
+  galaxy_tags:
+    - openssl
+    - pki
+    - ssl
+    - tls
+    - pki
+    - certificate
     # List tags for your role here, one per line. A tag is
     # a keyword that describes and categorizes the role.
     # Users find roles by searching for tags. Be sure to
