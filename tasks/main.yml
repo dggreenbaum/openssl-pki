@@ -1,7 +1,5 @@
 ---
-- name: OS packages
-  package: "name={{ item }} state=present"
-  with_items: "{{ openssl_pki_os_packages }}"
+- include: "{{ ansible_os_family }}.yml"
 
 - name: Directories
   delegate_to: localhost
