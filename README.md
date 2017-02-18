@@ -2,14 +2,14 @@ OpenSSL PKI
 =========
 [![Ansible Galaxy](https://img.shields.io/badge/role-dggreenbaum.openssl--pki-blue.svg)](https://galaxy.ansible.com/dggreenbaum/openssl-pki/) [![Build Status](https://travis-ci.org/dggreenbaum/openssl-pki.svg?branch=master)](https://travis-ci.org/dggreenbaum/openssl-pki)
 
-This role sets up a root certificate authority (CA), an arbitrary number of intermediate CAs (EG for each environment), and an arbitrary number SSL/TLS keys and certificates signed by those  CAs.
+This role sets up a root certificate authority (CA), an intermediate CA, and an arbitrary number SSL/TLS keys and certificates signed by the intermediate CA.
 
 Requirements
 ------------
 
-Requires a Unix like operating system. (Linux/OSX) The latest Debian/Ubuntu are supported.
+Requires a Unix like operating system. (Linux/OSX) The latest Debian/Ubuntu and MacOS are supported.
 
-This role will attempt to install the openssl package or equivilant for your operating system. If your operating system does not have an openssl package (EG Windows)m this role won't work.
+This role will attempt to install the openssl package or equivalent for your operating system. If your operating system does not have an openssl package (EG Windows) this role won't work.
 
 Role Variables
 --------------
@@ -17,7 +17,7 @@ Role Variables
 |CA Location|Default|
 |---|---|
 |openssl_pki_certs_ca_root_dir|"{{ ansible_env.HOME }}/ca"|
-|openssl_pki_certs_server_root_dir|"{{ ansible_env.HOME }}/srv"|
+|openssl_pki_certs_server_root_dir|"/srv/keys"|
 
 |CA Names|Default|
 |---|---|
@@ -62,7 +62,7 @@ Role Variables
 |openssl_pki_intermediate_key_mode|"0400"|
 |openssl_pki_intermediate_cert_mode|"0444"|
 |openssl_pki_intermediate_chain_mode|"0444"|
-|openssl_pki_server_key_mode|"0400"|
+|openssl_pki_server_key_mode|"0444"|
 |openssl_pki_server_cert_mode|"0444"|
 
 |Key Strength|Default|

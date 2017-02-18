@@ -6,7 +6,7 @@ openssl_pki_os_packages:
 
 # CA location
 openssl_pki_certs_ca_root_dir: "{{ ansible_env.HOME }}/ca"
-openssl_pki_certs_server_root_dir: "{{ ansible_env.HOME }}/srv"
+openssl_pki_certs_server_root_dir: "/srv/keys"
 
 openssl_pki_ca_name: "ca"
 openssl_pki_intermediate_ca_name: "intermediate"
@@ -74,7 +74,7 @@ openssl_pki_intermediate_cert_mode: "0444"
 
 openssl_pki_intermediate_chain_mode: "0444"
 
-openssl_pki_server_key_mode: "0400"
+openssl_pki_server_key_mode: "0444"
 openssl_pki_server_cert_mode: "0444"
 
 # Key Strength
