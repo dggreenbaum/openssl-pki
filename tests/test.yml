@@ -2,3 +2,5 @@
 - hosts: localhost
   roles:
     - openssl-pki
+  vars:
+    openssl_pki_certs_server_root_dir: "{{ ansible_env.HOME }}/srv"
