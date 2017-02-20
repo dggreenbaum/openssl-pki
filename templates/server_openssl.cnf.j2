@@ -129,6 +129,9 @@ subjectAltName = @alt_names
 {% for name in openssl_pki_server_alternative_names %}
 DNS.{{ loop.index }} = {{ name }}
 {% endfor %}
+{% for ip in openssl_pki_server_alternative_ips %}
+IP.{{ loop.index }} = {{ ip }}
+{% endfor %}
 
 [ crl_ext ]
 # Extension for CRLs (`man x509v3_config`).

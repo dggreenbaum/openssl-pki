@@ -42,7 +42,8 @@ Role Variables
 
 |Server Alternative Names|Default|
 |---|---|
-|openssl_pki_server_alternative_names|["example.com"]|
+|openssl_pki_server_alternative_names|["{{ ansible_hostname }}"]|
+|openssl_pki_server_alternative_ips|["{{ ansible_all_ipv4_addresses }}"]|
 
 |Cert lifespan|Default|
 |---|---|

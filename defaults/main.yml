@@ -26,7 +26,8 @@ openssl_pki_server_common_name: "{{ inventory_hostname }}"
 
 # Server Alternative Names
 openssl_pki_server_alternative_names:
-  - "example.com"
+  - "{{ ansible_hostname }}"
+openssl_pki_server_alternative_ips: "{{ ansible_all_ipv4_addresses }}"
 
 # Cert lifespan
 openssl_pki_server_cert_days: "365"
